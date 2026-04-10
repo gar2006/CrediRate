@@ -1,0 +1,3 @@
+@echo off
+echo Starting the application...
+venv\Scripts\python.exe app.py

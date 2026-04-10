@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrediRate</title>
+    <!-- Modern Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-mesh"></div>
+
+    <header class="app-header">
+        <div class="container">
+            <h1><span class="gradient-text">Credi</span>Rate</h1>
+            <p class="subtitle">Where structured data builds credibility.</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Dashboard List View -->
+        <section id="dashboard-view">
+            <h2 class="section-title">Rated Entities</h2>
+            <div id="entities-grid" class="grid-container">
+                <!-- Entities will be injected here via JS -->
+            </div>
+        </section>
+
+        <!-- Detailed Entity View -->
+        <section id="detail-view" class="hidden">
+            <button id="back-button" class="btn-outline">← Back to Dashboard</button>
+            <div id="entity-header" class="glass-panel">
+                <h2 id="detail-title" class="title"></h2>
+                <p id="detail-desc" class="desc"></p>
+                <div class="score-comparison">
+                    <div class="score-box primary">
+                        <span class="score-label">Trust Score (Weighted)</span>
+                        <div id="detail-trust-score" class="score-value"></div>
+                    </div>
+                    <div class="score-box secondary">
+                        <span class="score-label">Average (Opaque)</span>
+                        <div id="detail-avg-score" class="score-value"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="audit-trail-section">
+                <h3 class="section-title">Credibility Audit Trail</h3>
+                <p class="section-subtitle">How the database evaluated these ratings to reach the final score.</p>
+                <div id="ratings-list" class="ratings-container">
+                    <!-- Explainable rating cards injected here -->
+                </div>
+            </div>
+
+            <div class="feedback-section">
+                <div class="feedback-layout">
+                    <div class="glass-panel feedback-panel">
+                        <div class="panel-kicker">Review Composer</div>
+                        <h4 class="panel-title">Share your experience</h4>
+                        <p class="panel-copy">Pick a star rating, add your notes, and post a review for the selected entity.</p>
+
+                        <form id="feedback-form" class="feedback-form">
+                            <div class="feedback-grid">
+                                <div class="field-group full-width">
+                                    <label for="feedback-name">Your Name</label>
+                                    <input id="feedback-name" name="user_name" type="text" maxlength="80" placeholder="Enter your name" required>
+                                    <small class="field-hint">Use an existing reviewer name to continue their history, or enter a new name to create a fresh reviewer instantly.</small>
+                                </div>
+                                <div class="field-group full-width">
+                                    <label>Your Star Rating</label>
+                                    <div id="star-rating" class="star-rating" role="radiogroup" aria-label="Star rating">
+                                        <button type="button" class="star-btn" data-value="1" aria-label="1 star">☆</button>
+                                        <button type="button" class="star-btn" data-value="2" aria-label="2 stars">☆</button>
+                                        <button type="button" class="star-btn" data-value="3" aria-label="3 stars">☆</button>
+                                        <button type="button" class="star-btn" data-value="4" aria-label="4 stars">☆</button>
+                                        <button type="button" class="star-btn" data-value="5" aria-label="5 stars">☆</button>
+                                    </div>
+                                    <div class="star-rating-meta">
+                                        <span id="star-rating-label">Select a rating</span>
+                                        <input id="feedback-rating" name="rating_value" type="hidden" required>
+                                    </div>
+                                </div>
+                                <div class="field-group full-width">
+                                    <label for="feedback-text">Feedback</label>
+                                    <textarea id="feedback-text" name="feedback_text" rows="5" maxlength="500" placeholder="Share your feedback about this entity" required></textarea>
+                                </div>
+                            </div>
+                            <div class="feedback-actions">
+                                <button type="submit" class="btn-primary">Submit Review</button>
+                                <p id="feedback-status" class="feedback-status"></p>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="glass-panel feedback-side-panel">
+                        <div class="panel-kicker">How It Works</div>
+                        <h4 class="panel-title">Your stars become ledger data</h4>
+                        <ul class="feature-list">
+                            <li>Star ratings are saved as real weighted reviews.</li>
+                            <li>Trust scores refresh when a new review is submitted.</li>
+                            <li>Your comment appears in the entity feedback stream.</li>
+                            <li>New reviewer names are created automatically so you can demo live submissions easily.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
