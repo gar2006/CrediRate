@@ -3,6 +3,8 @@
 **CrediRate** is a full-stack Flask and MySQL application designed to showcase programmatic credibility scoring. By moving beyond traditional "dumb" averages, CrediRate utilizes complex backend SQL Views to evaluate the metadata of every single reviewer (recency, history, reliability, and verification status) to generate a robust, tamper-resistant **Weighted Trust Score**.
 
 ---
+## Demo Link: 
+https://youtu.be/9iT_ev2he1A
 
 ## Key Features
 - **Algorithmic Trust Scores**: Calculates a dynamic `final_weight` for every single review using multiple mathematical factors directly inside a mathematical MySQL View.
