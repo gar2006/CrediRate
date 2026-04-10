@@ -110,7 +110,7 @@ def get_entity_details(entity_id):
     ratings = fetch_all(
         '''
         SELECT
-            rating_id, username, is_verified, reputation_score,
+            rating_id, user_id, username, is_verified, reputation_score,
             rating_value, review_text, created_at, age_days,
             recency_factor, recency_bucket, user_reliability_factor,
             reputation_factor, verification_bonus, total_reviews_by_user,
@@ -208,6 +208,33 @@ def submit_entity_feedback(entity_id):
         'feedback': feedback,
         'rating_id': rating_id
     }), 201
+
+
+@app.route('/api/users/<int:user_id>', methods=['GET'])
+def get_user_details(user_id):
+    user = fetch_one('SELECT id, username, join_date, is_verified, reputation_score FROM users WHERE id = %s', (user_id,))
+    if user is None:
+        return jsonify({'error': 'User not found'}), 404
+
+    ratings = fetch_all(
+        '''
+        SELECT
+            r.id as rating_id, r.rating_value, r.review_text, r.created_at,
+            e.id as entity_id, e.name as entity_name,
+            vw.final_weight, vw.credibility_breakdown
+        FROM ratings r
+        JOIN entities e ON r.entity_id = e.id
+        LEFT JOIN vw_credibility_weights vw ON r.id = vw.rating_id
+        WHERE r.user_id = %s
+        ORDER BY r.created_at DESC
+        ''',
+        (user_id,)
+    )
+
+    return jsonify({
+        'user': user,
+        'ratings': ratings
+    })
 
 
 if __name__ == '__main__':
