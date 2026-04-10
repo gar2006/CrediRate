@@ -27,6 +27,26 @@
             </div>
         </section>
 
+        <!-- User Profile View -->
+        <section id="user-profile-view" class="hidden">
+            <button id="profile-back-button" class="btn-outline">← Back</button>
+            <div class="glass-panel" id="user-profile-header" style="margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 id="profile-username" class="title" style="display: inline-block;"></h2>
+                        <span id="profile-verified-badge" class="verified-badge hidden" style="margin-left: 10px;">✔ Verified</span>
+                        <p id="profile-join-date" class="desc" style="margin-top: 10px;"></p>
+                    </div>
+                    <div class="score-box primary" style="min-width: 150px;">
+                        <span class="score-label">Reputation Score</span>
+                        <div id="profile-reputation" class="score-value"></div>
+                    </div>
+                </div>
+            </div>
+            <h3 class="section-title">Review History</h3>
+            <div id="profile-ratings-list" class="ratings-container"></div>
+        </section>
+
         <!-- Detailed Entity View -->
         <section id="detail-view" class="hidden">
             <button id="back-button" class="btn-outline">← Back to Dashboard</button>
@@ -46,8 +66,17 @@
             </div>
 
             <div class="audit-trail-section">
-                <h3 class="section-title">Credibility Audit Trail</h3>
-                <p class="section-subtitle">How the database evaluated these ratings to reach the final score.</p>
+                <div class="section-heading">
+                    <div>
+                        <h3 class="section-title">Credibility Audit Trail</h3>
+                        <p class="section-subtitle">How the database evaluated these ratings to reach the final score.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="filter-verified">
+                        <span class="slider"></span>
+                        <span class="toggle-label">Verified Reviewers Only</span>
+                    </label>
+                </div>
                 <div id="ratings-list" class="ratings-container">
                     <!-- Explainable rating cards injected here -->
                 </div>
