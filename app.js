@@ -1,8 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     const dashboardView = document.getElementById('dashboard-view');
     const detailView = document.getElementById('detail-view');
+    const userProfileView = document.getElementById('user-profile-view');
     const entitiesGrid = document.getElementById('entities-grid');
     const backBtn = document.getElementById('back-button');
+    const profileBackBtn = document.getElementById('profile-back-button');
+    const filterVerified = document.getElementById('filter-verified');
+
+    const profileUsername = document.getElementById('profile-username');
+    const profileVerifiedBadge = document.getElementById('profile-verified-badge');
+    const profileJoinDate = document.getElementById('profile-join-date');
+    const profileReputation = document.getElementById('profile-reputation');
+    const profileRatingsList = document.getElementById('profile-ratings-list');
 
     const detailTitle = document.getElementById('detail-title');
     const detailDesc = document.getElementById('detail-desc');
@@ -17,11 +26,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const ratingInput = document.getElementById('feedback-rating');
     const starRatingLabel = document.getElementById('star-rating-label');
     let activeEntityId = null;
+    let currentRatingsData = [];
+
+    if (filterVerified) {
+        filterVerified.addEventListener('change', () => {
+            renderAuditTrail();
+        });
+    }
 
     // Fetch and display dashboard
     async function loadDashboard() {
         dashboardView.classList.remove('hidden');
         detailView.classList.add('hidden');
+        userProfileView.classList.add('hidden');
         entitiesGrid.innerHTML = '<p>Loading entities...</p>';
 
         try {
@@ -58,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadDetailView(entityId) {
         activeEntityId = entityId;
         dashboardView.classList.add('hidden');
+        userProfileView.classList.add('hidden');
         detailView.classList.remove('hidden');
         ratingsList.innerHTML = '<p>Loading audit trail...</p>';
         if (feedbackList) {
@@ -75,7 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
             detailTrustScore.textContent = entity.trust_score ? Number(entity.trust_score).toFixed(2) : 'N/A';
             detailAvgScore.textContent = entity.simple_average ? Number(entity.simple_average).toFixed(2) : 'N/A';
             
-            renderAuditTrail(data.ratings);
+            currentRatingsData = data.ratings;
+            renderAuditTrail();
             renderFeedback(data.feedback || []);
             
         } catch (err) {
@@ -88,11 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Render the Explainer Cards
-    function renderAuditTrail(ratings) {
+    function renderAuditTrail() {
         ratingsList.innerHTML = '';
         
+        let ratings = currentRatingsData || [];
+        if (filterVerified && filterVerified.checked) {
+            ratings = ratings.filter(r => r.is_verified);
+        }
+
         if (ratings.length === 0) {
-            ratingsList.innerHTML = '<p>No ratings found.</p>';
+            ratingsList.innerHTML = '<p>No ratings found matching criteria.</p>';
             return;
         }
 
@@ -113,10 +137,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const wRepeat = Number(r.repeat_reviewer_factor || 1).toFixed(2);
             const wFinal = Number(r.final_weight).toFixed(2);
             
+            const verifiedBadge = r.is_verified ? '<span class="verified-badge">✔ Verified</span>' : '';
+            
             card.innerHTML = `
                 <div class="rating-content">
                     <div class="rating-meta">
-                        <span class="rating-author">${r.username}</span>
+                        <div><span class="rating-author clickable-author" data-userid="${r.user_id}" style="cursor: pointer; text-decoration: underline;">${r.username}</span>${verifiedBadge}</div>
                         <span class="rating-date">${dateStr} (${r.age_days} days ago)</span>
                     </div>
                     <div class="rating-stars">${stars}</div>
@@ -160,6 +186,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="breakdown-copy">${r.credibility_breakdown}</p>
                 </div>
             `;
+            
+            const authorLink = card.querySelector('.clickable-author');
+            if (authorLink) {
+                authorLink.addEventListener('click', (e) => {
+                    loadUserProfile(r.user_id || e.target.dataset.userid);
+                });
+            }
             
             ratingsList.appendChild(card);
         });
@@ -293,7 +326,58 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Load User Profile View
+    async function loadUserProfile(userId) {
+        dashboardView.classList.add('hidden');
+        detailView.classList.add('hidden');
+        userProfileView.classList.remove('hidden');
+        profileRatingsList.innerHTML = '<p>Loading profile...</p>';
+
+        try {
+            const res = await fetch(`/api/users/${userId}`);
+            const data = await res.json();
+            
+            if (!res.ok) throw new Error(data.error);
+            
+            profileUsername.textContent = data.user.username;
+            if (data.user.is_verified) {
+                profileVerifiedBadge.classList.remove('hidden');
+            } else {
+                profileVerifiedBadge.classList.add('hidden');
+            }
+            profileJoinDate.textContent = `Joined: ${new Date(data.user.join_date).toLocaleDateString()}`;
+            profileReputation.textContent = data.user.reputation_score;
+            
+            profileRatingsList.innerHTML = '';
+            if (data.ratings.length === 0) {
+                profileRatingsList.innerHTML = '<p>No reviews from this user.</p>';
+            } else {
+                data.ratings.forEach((r, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'glass-panel entity-card animate-in';
+                    card.style.animationDelay = `${index * 0.1}s`;
+                    const stars = '★'.repeat(r.rating_value) + '☆'.repeat(5 - r.rating_value);
+                    const finalW = r.final_weight ? Number(r.final_weight).toFixed(2) : '1.00';
+                    card.innerHTML = `
+                        <h4 style="margin:0 0 10px; color:var(--accent-blue)">For: ${r.entity_name}</h4>
+                        <div class="rating-meta" style="margin-bottom:12px;">
+                            <span class="rating-date">${new Date(r.created_at).toLocaleDateString()}</span>
+                            <span style="font-family:monospace; color:var(--accent-teal);">Weight: x${finalW}</span>
+                        </div>
+                        <div class="rating-stars">${stars}</div>
+                        <p class="rating-text">"${r.review_text}"</p>
+                    `;
+                    profileRatingsList.appendChild(card);
+                });
+            }
+        } catch (err) {
+            console.error(err);
+            profileRatingsList.innerHTML = '<p>Error loading user profile.</p>';
+        }
+    }
+
     backBtn.addEventListener('click', loadDashboard);
+    if(profileBackBtn) profileBackBtn.addEventListener('click', loadDashboard);
     feedbackForm.addEventListener('submit', handleFeedbackSubmit);
     attachStarHandlers();
     updateStarRating(0);
