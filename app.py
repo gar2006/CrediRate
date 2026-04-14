@@ -3,11 +3,16 @@ import mysql.connector
 from mysql.connector import Error
 import os
 
+ 
+import os
+
 DB_CONFIG = {
-    'host': '127.0.0.1',
-    'user': 'root',
-    'password': '',
-    'database': 'credirate',
+    'host': os.environ.get("MYSQLHOST"),
+    'user': os.environ.get("MYSQLUSER"),
+    'password': os.environ.get("MYSQLPASSWORD"),
+    'database': os.environ.get("MYSQLDATABASE"),
+    'port': int(os.environ.get("MYSQLPORT", 3306))
+
 }
 
 app = Flask(__name__, static_folder='static', static_url_path='')
@@ -240,4 +245,5 @@ def get_user_details(user_id):
 if __name__ == '__main__':
     os.makedirs('static', exist_ok=True)
     print('Starting Flask server on http://127.0.0.1:5000')
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
